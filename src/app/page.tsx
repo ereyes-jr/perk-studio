@@ -1,65 +1,55 @@
 import Image from "next/image";
+import Link from "next/link";
 
-export default function Home() {
+async function getPhotos() {
+  "use cache";
+
+  //for now this is manually defined, return to use db.photo.findMany()
+  return [
+    { id: "1", url: "https://picsum.photos/id/10/800/800" , title: "Photo 1" },
+    { id: "2", url: "https://picsum.photos/id/20/800/800" , title: "Photo 2" },
+    { id: "3", url: "https://picsum.photos/id/30/800/800" , title: "Photo 3" },
+  ];
+}
+
+export default async function Home() {
+  const photos = await getPhotos();
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="min-h-screen p-12 bg-zinc-950">
+      <div className="flex justify-between items-end bm-12">
+        <div>
+          <h1 className="text-5xl font-extrabold tracking-tigher text-white"> Perk Studio</h1>
+          <p className="text-zinc-500 mt-2 text-lg">High Quality photos taken by Perk Studio</p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+        {/* This will be hidden behind auth later */}
+
+        <button className="bg-white text-black px-6 py-2 rounded-full font-medium hover:bg-zinc-200 transition-colors">
+          Upload
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {photos.map((photo) => (
+          <Link
+            key={photo.id}
+            href={`/photos/${photo.id}`}
+            scroll={false}
+            className="group relative aspect-[4/5] overflow-hidden rounded-3xl bg-zinc-900 border border-zinc-800"
+            >
+            <Image 
+            src={photo.url}
+            alt={photo.title}
+            fill
+            className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:rotate-1"
+            sizes="(max-width:768px 100vw, (max-width:1200px) 50vw, 33vw)"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-8">
+              <p className="text-xl font-semibold text-white">{photo.title}</p>
+              </div>
+              </Link>
+          ))}
+      </div>
+    </main>
   );
 }
