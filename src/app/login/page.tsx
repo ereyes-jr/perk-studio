@@ -1,52 +1,55 @@
-"use client"
+"use client";
 
-import { useEffect, useCallback, useState } from "react";
-import { redirect, useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { register } from "@teamhanko/hanko-elements";
+import { useAuth } from "@/lib/auth-context";
 
 const hankoApi = process.env.NEXT_PUBLIC_HANKO_API_URL ?? "";
 
 export default function LoginPage() {
     const router = useRouter();
-    const [hankoElement, setHankoElement] = useState<any>(null);
-
-    //redirect after a successful login
-    const redirectAfterLogin = useCallback(() => {
-        router.replace("/");
-        router.refresh();
-    }, [router]);
+    const { refresh } = useAuth();
 
     useEffect(() => {
-        register(hankoApi).catch((err) => console.error(err));
-}, []);
+        // Register Hanko Web Components
+        register(hankoApi).catch(() => {});
 
-    useEffect(() => {
-        const container = document.getElementById("hanko-auth");
-        container?.addEventListener("onAuthFlowCompleted", redirectAfterLogin);
+        const hankoAuthElement = document.getElementById("hanko-auth");
+
+        const handleSessionCreated = async () => {
+            // Update global state immediately
+            await refresh();
+            // Move the user to the dashboard/home
+            router.replace("/");
+        };
+
+        // Listen for the successful login event from the custom element
+        hankoAuthElement?.addEventListener("onSessionCreated", handleSessionCreated);
 
         return () => {
-            container?.removeEventListener("onAuthFlowCompleted", redirectAfterLogin);
+            hankoAuthElement?.removeEventListener("onSessionCreated", handleSessionCreated);
         };
-    }, [redirectAfterLogin]);
-        
+    }, [router, refresh]);
+
     return (
         <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-6">
             <div className="w-full max-w-sm bg-zinc-900 p-8 rounded-3xl border border-zinc-800 shadow-2xl">
                 <h1 className="text-2xl font-bold text-white mb-6 text-center">Admin Access</h1>
 
-                <hanko-auth id="hanko-auth"/>
+                <hanko-auth id="hanko-auth" />
 
                 <style jsx global>{`
-                hanko-auth::part(container){
-                    background-color: transparent;
-                }
-                hanko-auth::part(button){
-                    background-color: white;
-                    color:black;
-                    border-radius: 99px;
-                }
-            `}</style>
+                    hanko-auth::part(container) {
+                        background-color: transparent;
+                    }
+                    hanko-auth::part(button) {
+                        background-color: white;
+                        color: black;
+                        border-radius: 99px;
+                    }
+                `}</style>
             </div>
         </div>
     );
-} 
+}

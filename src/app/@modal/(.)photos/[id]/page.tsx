@@ -1,11 +1,8 @@
 import Image from "next/image";
 import { Modal } from "@/components/modal";
+import { Suspense } from "react";
 
-export default async function PhotoModal({
-    params,
-}: {
-    params: Promise<{ id: string }>;
-}) {
+async function PhotoContent({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
 
     const photo = {
@@ -15,8 +12,7 @@ export default async function PhotoModal({
     };
 
     return (
-        <Modal>
-        <div className="bg-zinc-900 rounded-2xl overflow-hidden shadow-2xl border border-zinc-800">
+        <div key={id} className="bg-zinc-900 rounded-2xl overflow-hidden shadow-2xl border border-zinc-800">
             <div className="flex flex-col items-center gap-4 relative w-full h-96">
                 <Image
                     src={photo.src}
@@ -25,13 +21,29 @@ export default async function PhotoModal({
                     className="object-contain"
                     priority
                 />
-                </div>
+            </div>
             <div className="p-6 bg-zinc-900">
                 <h2 className="text-xl font-semibold text-white">{photo.title}</h2>
-                <p className="text-zinc-400">{photo.id}.</p>
+                <p className="text-zinc-400">ID: {photo.id}</p>
             </div>
         </div>
-    </Modal>
     );
-};
+}
 
+export default function PhotoModalPage({
+    params,
+}: {
+    params: Promise<{ id: string }>;
+}) {
+    return (
+        <Modal>
+            <Suspense fallback={
+                <div className="h-[500px] w-full flex items-center justify-center bg-zinc-900 rounded-2xl animate-pulse">
+                    <span className="text-zinc-500">Loading Photo Detail...</span>
+                </div>
+            }>
+                <PhotoContent params={params} />
+            </Suspense>
+        </Modal>
+    );
+}

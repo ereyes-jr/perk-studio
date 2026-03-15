@@ -29,8 +29,7 @@ export default function PhotoPage({
     params: Promise<{ id: string }>;
 }) {
     return (
-        <div className="min-h-screen bg-zinc-950 p-8 flex flex-col items-center">
-            <Link href="/" className="self-start text-zinc-400 hover:text-white mb-8 transition-colors">
+        <div className="w-full h-full p-8 flex flex-col items-center bg-black/90 backdrop-blur-xl">            <Link href="/" className="self-start text-zinc-400 hover:text-white mb-8 transition-colors">
             &larr; Back to Gallery
             </Link>
             <Suspense fallback={
