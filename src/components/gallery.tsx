@@ -46,11 +46,18 @@ function SortablePhoto({ photo, isEditMode, isAdmin, onEdit, onDelete }: any) {
     setIsDeleting(false);
   };
 
+  const getFullImageUrl = (path: string) => {
+    if (!path) return "";
+    if (path.startsWith('http')) return path;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    return `${supabaseUrl}/storage/v1/object/public/photos/${path}`;
+  };
+
   return (
     <div ref={setNodeRef} style={style} className="group relative flex flex-col overflow-hidden rounded-[2.5rem] bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 transition-shadow hover:shadow-xl">
       <div className="relative aspect-[4/5] w-full overflow-hidden bg-zinc-200 dark:bg-zinc-800">
         <Image 
-          src={photo.image_url} 
+          src={getFullImageUrl(photo.image_url)} 
           alt={photo.title || ""} 
           fill 
           unoptimized
@@ -85,7 +92,7 @@ function SortablePhoto({ photo, isEditMode, isAdmin, onEdit, onDelete }: any) {
           </div>
           <div className="flex gap-2">
             <button onClick={() => onEdit(photo)} className="px-4 py-2.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 shadow-md">
-              <Pencil className="h-3.5 w-3.5" /> Edit
+              < Pencil className="h-3.5 w-3.5" /> Edit
             </button>
             <button 
               onClick={handleDelete} 
