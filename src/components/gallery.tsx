@@ -48,19 +48,20 @@ function SortablePhoto({ photo, isEditMode, isAdmin, onEdit, onDelete }: any) {
 
   return (
     <div ref={setNodeRef} style={style} className="group relative flex flex-col overflow-hidden rounded-[2.5rem] bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 transition-shadow hover:shadow-xl">
-      <div className="relative aspect-[4/5] overflow-hidden">
+      <div className="relative aspect-[4/5] w-full overflow-hidden">
         <Image 
           src={photo.image_url} 
           alt={photo.title || ""} 
           fill 
-          className="object-cover transition-all duration-700 group-hover:scale-105" 
+          className="relative z-0 object-cover transition-all duration-700 group-hover:scale-105" 
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          priority={photo.display_order < 6}
         />
         
         {!isEditMode && (
           <Link 
             href={`/photos/${photo.id}`} 
-            className="absolute inset-0 z-10"
+            className="absolute inset-0 z-10 block"
             scroll={false} 
           >
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col justify-end p-8">
