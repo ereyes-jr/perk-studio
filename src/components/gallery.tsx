@@ -50,9 +50,21 @@ function SortablePhoto({ photo, isEditMode, isAdmin, onEdit, onDelete }: any) {
   return (
     <div ref={setNodeRef} style={style} className="group relative flex flex-col overflow-hidden rounded-[2.5rem] bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 transition-shadow hover:shadow-xl">
       <div className="relative aspect-[4/5] overflow-hidden">
-        <Image src={photo.image_url} alt={photo.title || ""} fill className="object-cover transition-all duration-700 group-hover:scale-105" />
+        <Image 
+          src={photo.image_url} 
+          alt={photo.title || ""} 
+          fill 
+          className="object-cover transition-all duration-700 group-hover:scale-105" 
+        />
+        
+        {/* The Intercepting Link Fix */}
         {!isEditMode && (
-          <Link href={`/photos/${photo.id}`} className="absolute inset-0 z-10">
+          <Link 
+            href={`/photos/${photo.id}`} 
+            className="absolute inset-0 z-10"
+            scroll={false} 
+            prefetch={false}
+          >
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col justify-end p-8">
               <p className="text-xl font-bold text-white mb-1">{photo.title}</p>
               <p className="text-xs text-zinc-400 line-clamp-1 italic mb-3">{photo.caption}</p>
@@ -65,6 +77,7 @@ function SortablePhoto({ photo, isEditMode, isAdmin, onEdit, onDelete }: any) {
           </Link>
         )}
       </div>
+
       {isAdmin && isEditMode && (
         <div className="flex items-center justify-between gap-2 p-4 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
           <div {...attributes} {...listeners} className="p-3 bg-zinc-100 dark:bg-zinc-800 rounded-xl cursor-grab active:cursor-grabbing hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors">
@@ -208,21 +221,18 @@ export default function Gallery() {
     if (!confirm("Are you sure? This will remove the photo permanently.")) return;
 
     try {
-      // 1. Extract file name for Storage removal
       const fileName = imageUrl.split('/').pop();
       if (fileName) {
         const { error: storageError } = await supabase.storage.from("photos").remove([fileName]);
         if (storageError) console.warn("Storage deletion warning:", storageError.message);
       }
 
-      // 2. Database Removal
       const { error: dbError } = await supabase.from("photos").delete().eq("id", id);
       
       if (dbError) {
         throw new Error(`Database rejected deletion: ${dbError.message}. Check your RLS policies.`);
       }
 
-      // 3. Update local UI only after DB confirmation
       setPhotos(prev => prev.filter(p => p.id !== id));
       
     } catch (err: any) {

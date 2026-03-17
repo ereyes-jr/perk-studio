@@ -1,46 +1,29 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 export function Modal({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const dialogRef = useRef<HTMLDialogElement>(null);
-    const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
         const dialog = dialogRef.current;
         if (!dialog) return;
 
-        // Force close any previous state
-        if (dialog.open) {
-            dialog.close();
+        if (!dialog.open) {
+            dialog.showModal();
         }
 
-        // Small delay ensures the DOM has settled before opening
-        const openTimeout = setTimeout(() => {
-            try {
-                dialog.showModal();
-                setIsOpen(true);
-            } catch (e) {
-                console.warn("Could not open modal:", e);
-            }
-        }, 0);
+        // Lock background scroll when modal is open
+        document.body.style.overflow = 'hidden';
 
         return () => {
-            clearTimeout(openTimeout);
-            if (dialog?.open) {
-                dialog.close();
-            }
+            dialog?.close();
+            document.body.style.overflow = 'unset';
         };
-    }, [children]); 
-
+    }, []); 
     const onDismiss = () => {
-        const dialog = dialogRef.current;
-        if (dialog?.open) {
-            dialog.close();
-        }
-        setIsOpen(false);
         router.back();
     };
 
@@ -51,14 +34,16 @@ export function Modal({ children }: { children: React.ReactNode }) {
             onClick={(e) => {
                 if (e.target === dialogRef.current) onDismiss();
             }}
-            className="m-0 h-full w-full max-w-none bg-black/80 backdrop:bg-transparent p-0 flex items-center justify-center border-none outline-none"
+
+            className="fixed inset-0 z-[100] m-0 flex h-full w-full max-w-none items-center justify-center border-none bg-black/90 p-0 outline-none backdrop:bg-transparent"
         >
             <div 
-                className="relative max-w-4xl w-[90%] md:w-full bg-zinc-900 rounded-3xl shadow-2xl overflow-hidden"
-                onClick={(e) => e.stopPropagation()}>
+                className="relative max-w-5xl w-[95%] md:w-full bg-zinc-900 rounded-[2.5rem] shadow-2xl overflow-hidden border border-white/5"
+                onClick={(e) => e.stopPropagation()}
+            >
                 <button
                     onClick={onDismiss}
-                    className="absolute top-4 right-4 z-10 p-2 bg-black/50 hover:bg-black/80 rounded-full text-white transition-all border border-white/10"
+                    className="absolute top-6 right-6 z-20 p-2.5 bg-black/40 hover:bg-black/80 rounded-full text-white/70 hover:text-white transition-all backdrop-blur-md border border-white/10"
                     aria-label="Close modal"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>

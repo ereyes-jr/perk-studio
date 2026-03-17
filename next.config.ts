@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   
     cacheComponents: true,
-
+    trailingSlash: false,
 
   images: {
     remotePatterns: [

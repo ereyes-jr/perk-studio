@@ -36,9 +36,7 @@ export default function RootLayout({
           <AdminProvider>
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
               {children}
-              <div className="fixed z-50">
                 {modal}
-              </div>
               <div id="modal-root" />
             </ThemeProvider>
           </AdminProvider>
