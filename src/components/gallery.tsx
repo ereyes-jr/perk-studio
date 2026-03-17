@@ -48,11 +48,12 @@ function SortablePhoto({ photo, isEditMode, isAdmin, onEdit, onDelete }: any) {
 
   return (
     <div ref={setNodeRef} style={style} className="group relative flex flex-col overflow-hidden rounded-[2.5rem] bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 transition-shadow hover:shadow-xl">
-      <div className="relative aspect-[4/5] w-full overflow-hidden">
+      <div className="relative aspect-[4/5] w-full overflow-hidden bg-zinc-200 dark:bg-zinc-800">
         <Image 
           src={photo.image_url} 
           alt={photo.title || ""} 
           fill 
+          unoptimized
           className="relative z-0 object-cover transition-all duration-700 group-hover:scale-105" 
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           priority={photo.display_order < 6}
