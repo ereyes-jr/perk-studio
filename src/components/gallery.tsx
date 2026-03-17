@@ -26,7 +26,6 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-// --- Sub-Component: Individual Sortable Photo Card ---
 function SortablePhoto({ photo, isEditMode, isAdmin, onEdit, onDelete }: any) {
   const [isDeleting, setIsDeleting] = useState(false);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -55,15 +54,14 @@ function SortablePhoto({ photo, isEditMode, isAdmin, onEdit, onDelete }: any) {
           alt={photo.title || ""} 
           fill 
           className="object-cover transition-all duration-700 group-hover:scale-105" 
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
         
-        {/* The Intercepting Link Fix */}
         {!isEditMode && (
           <Link 
             href={`/photos/${photo.id}`} 
             className="absolute inset-0 z-10"
             scroll={false} 
-            prefetch={false}
           >
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col justify-end p-8">
               <p className="text-xl font-bold text-white mb-1">{photo.title}</p>
@@ -101,7 +99,6 @@ function SortablePhoto({ photo, isEditMode, isAdmin, onEdit, onDelete }: any) {
   );
 }
 
-// --- Sub-Component: Edit Metadata Modal ---
 function EditPhotoModal({ photo, isOpen, onClose, onUpdate }: any) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<any>(photo || {});
@@ -158,7 +155,6 @@ function EditPhotoModal({ photo, isOpen, onClose, onUpdate }: any) {
   );
 }
 
-// --- Main Gallery Component ---
 export default function Gallery() {
   const { isEditMode, setHasUnsavedChanges, setIsSaving, saveTrigger } = useAdmin();
   const [photos, setPhotos] = useState<any[]>([]);
@@ -173,6 +169,13 @@ export default function Gallery() {
     const hanko = new Hanko(hankoApi) as any;
     const initialize = async () => {
       try {
+        const hasCookie = document.cookie.split(';').some((item) => item.trim().startsWith('hanko='));
+        if (!hasCookie) {
+          setIsAdmin(false);
+          const { data } = await supabase.from('photos').select('*').order('display_order', { ascending: true });
+          setPhotos(data || []);
+          return; 
+        }
         const user = await hanko.user.getCurrent();
         setIsAdmin(!!user);
         const { data } = await supabase.from('photos').select('*').order('display_order', { ascending: true });
@@ -180,7 +183,9 @@ export default function Gallery() {
       } catch (err) {
         const { data } = await supabase.from('photos').select('*').order('display_order', { ascending: true });
         setPhotos(data || []);
-      } finally { setLoading(false); }
+      } finally {
+        setLoading(false);
+      }
     };
     initialize();
   }, [hankoApi]);
@@ -213,30 +218,14 @@ export default function Gallery() {
   };
 
   const deletePhoto = async (id: string, imageUrl: string) => {
-    if (!isAdmin) {
-        alert("Action restricted to admins.");
-        return;
-    }
-    
-    if (!confirm("Are you sure? This will remove the photo permanently.")) return;
-
+    if (!isAdmin) return;
+    if (!confirm("Are you sure?")) return;
     try {
       const fileName = imageUrl.split('/').pop();
-      if (fileName) {
-        const { error: storageError } = await supabase.storage.from("photos").remove([fileName]);
-        if (storageError) console.warn("Storage deletion warning:", storageError.message);
-      }
-
-      const { error: dbError } = await supabase.from("photos").delete().eq("id", id);
-      
-      if (dbError) {
-        throw new Error(`Database rejected deletion: ${dbError.message}. Check your RLS policies.`);
-      }
-
+      if (fileName) await supabase.storage.from("photos").remove([fileName]);
+      await supabase.from("photos").delete().eq("id", id);
       setPhotos(prev => prev.filter(p => p.id !== id));
-      
     } catch (err: any) {
-      console.error("Delete sequence failed:", err);
       alert(err.message);
     }
   };
@@ -261,7 +250,6 @@ export default function Gallery() {
           </div>
         </SortableContext>
       </DndContext>
-
       <EditPhotoModal 
         photo={editingPhoto} 
         isOpen={!!editingPhoto} 
