@@ -1,16 +1,16 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { UploadDropzone } from "@/components/upload-dropzone";
 
-export default async function UploadPage() {
-    const cookieStore = await cookies();
-    const hankoCookie = cookieStore.get("hanko");
+async function UploadContent() {
 
-    if (!hankoCookie) {
-       redirect("/login");
-    }
+    await cookies(); 
 
+    return <UploadDropzone />;
+}
+
+export default function UploadPage() {
     return (
         <main className="min-h-screen bg-zinc-950 p-12 flex flex-col items-center">
           <div className="max-w-3xl w-full">
@@ -21,7 +21,9 @@ export default async function UploadPage() {
             <h1 className="text-4xl font-bold text-white mb-2">Upload</h1>
             <p className="text-zinc-500 mb-12">Add new photos to your portfolio</p>
 
-            <UploadDropzone />
+            <Suspense fallback={<div className="text-zinc-500">Loading Upload Portal...</div>}>
+                <UploadContent />
+            </Suspense>
           </div>
         </main>
     );
